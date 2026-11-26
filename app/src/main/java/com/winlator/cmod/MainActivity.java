@@ -810,13 +810,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         boolean storageReady = checkStoragePermissions();
         ImageFs imageFs = ImageFs.find(this);
         boolean imageFsReady = imageFs.isValid();
-        report.append("STATUS: ");
-        if (consoleImageFsInstallPending || consoleRuntimeInstallPending || consoleContainerCreationPending) {
-            report.append("SEDANG DISIAPKAN\n");
-        } else {
-            report.append(storageReady && imageFsReady ? "PEMERIKSAAN SELESAI\n" : "BELUM SIAP\n");
-        }
-        report.append("\nPenyimpanan: ").append(storageReady ? "OK" : "IZIN DIPERLUKAN").append('\n');
+        report.append("Penyimpanan: ").append(storageReady ? "OK" : "IZIN DIPERLUKAN").append('\n');
         report.append("ImageFS: ").append(imageFsReady ? "VALID" : "BELUM VALID");
         if (imageFsReady) {
             try { report.append(" (versi ").append(imageFs.getVersion()).append(')'); }
@@ -832,6 +826,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             }
         }
+        boolean runtimeReady = false;
         report.append("Container: ").append(consoleContainer == null ? "BELUM DIBUAT" : "DITEMUKAN").append('\n');
         if (consoleContainer != null) {
             report.append("Runtime ID: ").append(consoleContainer.getWineVersion()).append('\n');
@@ -842,7 +837,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 File runtimeRoot = info.path == null ? null : new File(info.path);
                 boolean binReady = runtimeRoot != null && new File(runtimeRoot, "bin").isDirectory();
                 boolean libReady = runtimeRoot != null && new File(runtimeRoot, "lib").isDirectory();
-                boolean runtimeReady = binReady && libReady;
+                runtimeReady = binReady && libReady;
                 report.append("Folder runtime: ").append(runtimeRoot == null ? "TIDAK DITEMUKAN" : runtimeRoot.getAbsolutePath()).append('\n');
                 report.append("Direktori bin: ").append(binReady ? "OK" : "HILANG").append('\n');
                 report.append("Direktori lib: ").append(libReady ? "OK" : "HILANG").append('\n');
@@ -859,7 +854,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .append(consoleImageFsInstallPending ? "ImageFS sedang dipasang; " : "")
                 .append(consoleRuntimeInstallPending ? "Runtime sedang diunduh/dipasang; " : "")
                 .append(consoleContainerCreationPending ? "Container sedang dibuat; " : "");
-        if (!consoleImageFsInstallPending && !consoleRuntimeInstallPending && !consoleContainerCreationPending) report.append("tidak ada proses berjalan");
+        boolean pending = consoleImageFsInstallPending || consoleRuntimeInstallPending || consoleContainerCreationPending;
+        if (!pending) report.append("tidak ada proses berjalan");
+        boolean overallReady = storageReady && imageFsReady && consoleContainer != null && runtimeReady && !pending;
+        report.insert(0, "STATUS: " + (pending ? "SEDANG DISIAPKAN" : (overallReady ? "SIAP" : "BELUM SIAP")) + "\n\n");
         return report.toString();
     }
 
