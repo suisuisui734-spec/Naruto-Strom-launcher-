@@ -869,6 +869,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (!checkStoragePermissions()) {
                         Toast.makeText(this, "Berikan izin penyimpanan terlebih dahulu.", Toast.LENGTH_LONG).show();
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) showAllFilesAccessDialog();
+                        else ActivityCompat.requestPermissions(this,
+                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                                PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST_CODE);
                         return;
                     }
                     if (ImageFsInstaller.installIfNeeded(this)) {
